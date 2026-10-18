@@ -15,6 +15,10 @@ if __name__ == "__main__":
             speech = Speech(Settings(), lambda _: None)
             speech.transcribe(np.zeros(16000, dtype=np.float32))
             translated = Translator(Settings()).translate('Hello, welcome to our application.', 'en')
+            from engine.process_audio import capability_error
+            process_error = capability_error()
+            if process_error:
+                raise RuntimeError(process_error)
             from PySide6.QtWidgets import QApplication
             from storage.database import Database
             from apps.desktop.main import Window
@@ -24,7 +28,7 @@ if __name__ == "__main__":
             app.processEvents()
             window.grab().save(str(DATA / 'self-test.png'))
             window.close()
-            report = {'ok': True, 'inputs': len(inputs), 'outputs': len(outputs), 'translation': translated}
+            report = {'ok': True, 'inputs': len(inputs), 'outputs': len(outputs), 'translation': translated,'process_capture_bridge':True}
         except Exception:
             report = {'ok': False, 'error': traceback.format_exc()}
         (DATA / 'self-test.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')

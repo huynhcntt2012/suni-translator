@@ -4,4 +4,6 @@ Bản triển khai gồm source, launcher, bản portable `dist/Suni/Suni.exe`, 
 
 Model Whisper small (~0.5 GB) và NLLB (~2.5 GB) được lưu riêng. Bộ cài phải giữ nguyên model/data khi nâng cấp; không xóa profile khi uninstall mặc định. NLLB không dành cho phân phối thương mại dưới giấy phép hiện tại.
 
-Hạn chế phát hành: process-specific capture và Replacement không khả dụng; chưa xác nhận chất lượng Piper tiếng Việt; chưa đo RTX 5060 Ti; chưa có code signing; cần test binary trên máy Windows sạch, driver audio thật và thiết bị USB. Cấu hình Inno Setup chưa đồng nghĩa đã compile installer.
+Đã bổ sung capture riêng ứng dụng theo cây tiến trình. Đã kiểm chứng Chrome WebAudio và test cách ly hai nguồn. Zoom/Discord chưa được nghiệm thu thực tế. Nguồn riêng chỉ bật Live Subtitles; Voice Overlay vẫn dùng nguồn System Audio.
+
+Hạn chế phát hành: Replacement không khả dụng; chưa xác nhận chất lượng nghe Piper tiếng Việt; chưa đo RTX 5060 Ti; chưa có code signing; cần test binary trên máy Windows sạch, driver audio thật và thiết bị USB. Cấu hình Inno Setup chưa đồng nghĩa đã compile installer.

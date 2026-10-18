@@ -8,6 +8,9 @@ NLLB_CODES = {"vi": "vie_Latn", "en": "eng_Latn", "zh": "zho_Hans", "ja": "jpn_J
 
 @dataclass
 class Settings:
+    capture_kind: str = "system"
+    process_pid: int = 0
+    process_created: float = 0.0
     source: str = "auto"
     target: str = "vi"
     mode: str = "subtitles"

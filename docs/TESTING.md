@@ -1,6 +1,6 @@
 # Kiểm thử và nghiệm thu
 
-Unit tests thực hiện resample có giữ tần số/thời lượng, từ chối route cùng endpoint, bounded queue bỏ mẫu cũ, SQLite persistence/isolated sessions, timestamp SRT và Unicode.
+9 unit tests thực hiện resample có giữ tần số/thời lượng, từ chối route cùng endpoint, bounded queue bỏ mẫu cũ, SQLite persistence/isolated sessions, timestamp SRT và Unicode, từ chối packet pipe bị cắt, PID tái sử dụng và chính cây audio Suni.
 
 Smoke GUI dựng dashboard, 4 tab, overlay và đóng an toàn bằng Qt offscreen. Đây là kiểm tra render/lifecycle, không chứng nhận tương tác click-through trên desktop thật.
 
@@ -18,6 +18,7 @@ Checklist manual còn phải làm:
 | Kill process giữa ducking rồi restart | Journal khôi phục volume nếu endpoint còn kết nối |
 | Offline ngắt Internet | Model đã tải vẫn nhận diện và dịch |
 | Auto VI/EN/ZH/JA/KO | Ghi độ chính xác trên các đoạn đủ dài, nhiều người nói |
+| Chrome/Zoom/Discord riêng | Chọn root PID, nguồn khác không lọt vào bản thu; test Chrome tone đã pass, Zoom/Discord chưa nghiệm thu |
 | CUDA/CPU fallback | Thử máy có runtime CUDA tương thích và máy thiếu runtime |
 | Replacement | Chưa triển khai; không đánh dấu pass |
 

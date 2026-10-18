@@ -8,3 +8,4 @@ models/
 *.log
 tmp/
 release/
+native/windows_audio/*.exe

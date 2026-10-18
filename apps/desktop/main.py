@@ -14,6 +14,7 @@ from engine.audio import devices
 from engine.pipeline import Pipeline
 from engine.providers import model_path, download_model, model_ready
 from engine.export import to_srt
+from engine.process_audio import applications, capability_error
 from storage.database import Database
 from apps.desktop.overlay import Overlay
 
@@ -128,6 +129,9 @@ class Window(QMainWindow):
         layout = QVBoxLayout(page)
         self.controls = QGroupBox("01   NGUỒN ÂM THANH & NGÔN NGỮ")
         form = QFormLayout(self.controls)
+        self.capture_kind = combo([('Toàn bộ thiết bị • System Audio','system'),('Ứng dụng riêng • gồm tiến trình con','process')],self.settings.capture_kind)
+        self.capture_kind.currentIndexChanged.connect(self.source_changed)
+        form.addRow('Phạm vi thu',self.capture_kind)
         self.capture = QComboBox()
         self.refresh = QPushButton("Làm mới thiết bị")
         self.refresh.clicked.connect(self.refresh_devices)
@@ -135,6 +139,9 @@ class Window(QMainWindow):
         row.addWidget(self.capture, 1)
         row.addWidget(self.refresh)
         form.addRow("System Audio", row)
+        self.processes = QComboBox()
+        self.processes.setMinimumContentsLength(30)
+        form.addRow('Ứng dụng / PID',self.processes)
         self.source = combo([("Tự nhận diện", "auto")]+[(v,k) for k,v in LANGUAGES.items()], self.settings.source)
         self.target = combo([(v,k) for k,v in LANGUAGES.items()], self.settings.target)
         languages = QHBoxLayout()
@@ -147,10 +154,10 @@ class Window(QMainWindow):
         if self.settings.mode == "replacement":
             self.mode.setCurrentIndex(0)
         form.addRow("Chế độ", self.mode)
-        note = QLabel("Thu toàn bộ âm thanh của thiết bị được chọn. Thu riêng theo ứng dụng chưa khả dụng.")
-        note.setWordWrap(True)
-        note.setObjectName("muted")
-        form.addRow(note)
+        self.source_note = QLabel()
+        self.source_note.setWordWrap(True)
+        self.source_note.setObjectName("muted")
+        form.addRow(self.source_note)
         layout.addWidget(self.controls)
         self.wave = Waveform()
         layout.addWidget(self.wave)
@@ -279,9 +286,35 @@ class Window(QMainWindow):
                 self.set_status("Không có thiết bị WASAPI loopback. Kết nối loa/tai nghe rồi làm mới.")
         except Exception as exc:
             self.set_status(f"Không đọc được thiết bị audio: {exc}")
+        selected = self.processes.currentData() or {'pid':self.settings.process_pid,'create_time':self.settings.process_created}
+        self.processes.clear()
+        self.processes.addItem('Chọn ứng dụng đang chạy…',None)
+        try:
+            for process in applications():
+                self.processes.addItem(f"{process['name']}   •   PID {process['pid']} (+ tiến trình con)",process)
+                if process['pid'] == selected['pid'] and abs(process['create_time']-selected['create_time']) < 0.01:
+                    self.processes.setCurrentIndex(self.processes.count()-1)
+        except Exception as exc:
+            self.set_status(f'Không đọc được tiến trình: {exc}')
+        error = capability_error()
+        self.capture_kind.model().item(1).setEnabled(not bool(error))
+        self.capture_kind.setToolTip(error)
+        self.source_changed()
+
+    def source_changed(self):
+        if not hasattr(self,'processes'):
+            return
+        process = self.capture_kind.currentData() == 'process'
+        self.processes.setEnabled(process)
+        self.capture.setEnabled(not process)
+        self.source_note.setText('Chọn tiến trình gốc của Chrome/Zoom/Discord. Thu cả tiến trình con, trên mọi thiết bị phát. Cần làm mới và chọn lại sau khi ứng dụng khởi động lại. Hiện hỗ trợ Live Subtitles.' if process else 'Thu toàn bộ âm thanh của thiết bị được chọn. Chuyển phạm vi thu để chỉ nghe một ứng dụng.')
 
     def save(self):
         s = self.settings
+        s.capture_kind = self.capture_kind.currentData()
+        selected = self.processes.currentData()
+        s.process_pid = selected['pid'] if selected else 0
+        s.process_created = selected['create_time'] if selected else 0
         for name, widget in [("source", self.source), ("target", self.target), ("mode", self.mode), ("compute", self.compute), ("whisper", self.whisper), ("translation", self.provider)]:
             setattr(s, name, widget.currentData())
         s.capture_name, s.output_name = self.capture.currentText(), self.output.currentText()
@@ -302,7 +335,10 @@ class Window(QMainWindow):
             self.set_status("Đang dừng; chờ tác vụ AI hiện tại kết thúc…")
             return
         self.save()
-        if not self.settings.capture_name:
+        if self.settings.capture_kind == 'process' and not self.settings.process_pid:
+            self.set_status('Chọn ứng dụng / PID trước khi bắt đầu.')
+            return
+        if self.settings.capture_kind == 'system' and not self.settings.capture_name:
             self.set_status("Chưa có thiết bị thu âm.")
             return
         self.controls.setEnabled(False)

@@ -1,5 +1,15 @@
-# Windows audio boundary
+# Windows audio bridge
 
-Current executable uses the native WASAPI backend supplied by PyAudioWPatch/PortAudio through `engine/audio.py`. No custom C++ process-loopback implementation is shipped in 0.1. Do not mark per-process capture or isolated Voice Replacement complete based on this directory.
+System endpoint capture uses PyAudioWPatch/PortAudio WASAPI in `engine/audio.py`.
 
-Future native worker contract: target PID, Windows build capability probe, endpoint IDs, explicit routing state, monotonic timestamps, 16 kHz float PCM over named pipe, bounded buffers, endpoint-change/error messages, and idempotent restore. Replacement requires tested virtual endpoint isolation rather than volume muting.
+Per-process capture is implemented by `ProcessLoopback.cs`: an isolated x64 .NET Framework bridge calling Windows Core Audio COM APIs (ActivateAudioInterfaceAsync, process-tree INCLUDE, IAudioCaptureClient). It does not capture a microphone, inject into the target, change audio routing, or mute unrelated apps. Build with `scripts/build_audio.ps1`; Windows 11 already includes the Framework runtime/compiler used here. This replaces the initially proposed custom C++ binary while retaining real native Windows API capture.
+
+STDIN newline/EOF stops the bridge. STDOUT is binary SLP1 PCM protocol; STDERR holds errors. Native activation times out after 10 seconds; Python Stop also enforces bridge shutdown. See `docs/ARCHITECTURE.md` for wire format.
+
+Microsoft references:
+
+- https://github.com/microsoft/Windows-classic-samples/tree/main/Samples/ApplicationLoopback
+- https://learn.microsoft.com/en-us/windows/win32/api/mmdeviceapi/nf-mmdeviceapi-activateaudiointerfaceasync
+- https://github.com/microsoft/win32metadata/blob/main/generation/WinSDK/RecompiledIdlHeaders/um/mmdeviceapi.h
+
+Voice Replacement is still unavailable and must not be simulated by volume muting.

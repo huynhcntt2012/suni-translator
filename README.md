@@ -6,11 +6,13 @@
 
 Nhấp đúp `Start-Suni.cmd`, hoặc chạy `.venv\Scripts\python.exe run.py` trong thư mục dự án. Bản đóng gói nằm tại `dist/Suni/Suni.exe`; giữ nguyên thư mục `_internal` cạnh EXE. Model Whisper small, NLLB và giọng Piper Việt vais1000 được tải vào `%LOCALAPPDATA%\SuniLiveTranslator\models` trên máy triển khai. Model không nằm trong bộ EXE để tránh nhân đôi dữ liệu.
 
-1. Chọn thiết bị **System Audio** đang phát tiếng nói.
+1. Chọn phạm vi **Toàn bộ thiết bị** rồi chọn thiết bị System Audio; hoặc chọn **Ứng dụng riêng** rồi chọn Chrome/Zoom/Discord và PID tương ứng.
 2. Chọn ngôn ngữ nguồn (nên chọn English khi nguồn đã biết) và đích Tiếng Việt.
 3. Giữ **Live Subtitles**, bấm **Bắt đầu phiên dịch**. Lần đầu chờ nạp model.
 4. Trong Cấu hình, bật mở khóa phụ đề để kéo vị trí, tắt để khôi phục click-through.
 5. Bấm Dừng trước khi đổi thiết bị/provider. Lịch sử lưu cục bộ và xuất được SRT/CSV theo từng phiên.
+
+Khi thu riêng ứng dụng, chọn tiến trình gốc để bao gồm các tiến trình con (đặc biệt với Chrome/Discord). Bấm **Làm mới thiết bị** để đồng thời làm mới danh sách ứng dụng. Nếu ứng dụng đã khởi động lại, chọn lại PID; Suni kiểm tra thời điểm tạo tiến trình để tránh dùng PID cũ. Thu theo tiến trình không phụ thuộc endpoint phát. Nguồn riêng hiện hỗ trợ **Live Subtitles**; Voice Overlay với ducking riêng audio session sẽ bổ sung sau.
 
 ## Cài máy khác
 
@@ -18,7 +20,7 @@ Windows 11 x64, Python 3.10–3.12. Chạy `powershell -ExecutionPolicy Bypass -
 
 ## Tính năng có code thực
 
-- WASAPI loopback theo thiết bị, waveform RMS từ âm thanh thực, resample 16 kHz.
+- WASAPI loopback theo thiết bị hoặc theo cây tiến trình; waveform RMS từ âm thanh thực, resample 16 kHz.
 - Faster-whisper + Silero VAD, tự nhận diện ngôn ngữ hoặc chọn nguồn, timestamp.
 - NLLB offline; adapter HTTP Ollama có URL/model cấu hình.
 - Phụ đề always-on-top, click-through, song ngữ, cỡ chữ và vị trí lưu lại.
@@ -35,8 +37,8 @@ Ducking hiện áp dụng toàn bộ endpoint nguồn, không riêng một ứng
 
 ## Phạm vi chưa hoàn thành
 
-- Capture riêng theo PID/process loopback C++.
 - Voice Replacement, virtual-device provisioning, tách giọng/nhạc nền.
+- Voice Overlay khi chọn nguồn tiến trình; kiểm chứng Zoom/Discord và các trường hợp đặc quyền/DRM.
 - Hotkey toàn hệ thống; thống kê GPU trực tiếp; cloud STT/TTS có xác thực.
 - Tự phục hồi thiết bị đang chạy: hiện báo lỗi, dừng và yêu cầu làm mới/Start.
 - Watchdog khôi phục volume ngay sau crash: hiện khôi phục ở lần khởi động sau.

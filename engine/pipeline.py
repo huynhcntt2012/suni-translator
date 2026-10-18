@@ -59,7 +59,12 @@ class Pipeline:
 
     def capture_worker(self):
         try:
-            audio.capture(self.settings.capture_name, self.stop_event, self.receive, self.meter)
+            if self.settings.capture_kind == 'process':
+                from engine.process_audio import capture_process
+                capture_process(self.settings.process_pid, self.settings.process_created, self.stop_event, self.receive, self.meter,
+                    lambda: self.status(f'Đang nghe riêng PID {self.settings.process_pid} và tiến trình con'))
+            else:
+                audio.capture(self.settings.capture_name, self.stop_event, self.receive, self.meter)
         except Exception as exc:
             self.fail(exc)
 
@@ -102,7 +107,15 @@ class Pipeline:
             if s.mode == "replacement":
                 raise ValueError("Voice Replacement chưa có routing cô lập đã kiểm chứng.")
             if s.mode == "voice":
+                if s.capture_kind == 'process':
+                    raise ValueError('Nguồn riêng từng ứng dụng hiện hỗ trợ Live Subtitles. Voice Overlay cần bổ sung ducking đúng audio session của tiến trình.')
                 audio.validate_voice_route(s.capture_name, s.output_name)
+            if s.capture_kind == 'process':
+                from engine.process_audio import validate_process, capability_error
+                error = capability_error()
+                if error:
+                    raise ValueError(error)
+                validate_process(s.process_pid, s.process_created)
             self.status("Đang nạp model cục bộ…")
             speech = Speech(s, self.status)
             if self.stop_event.is_set():
@@ -118,7 +131,7 @@ class Pipeline:
             if voice:
                 voice_thread = threading.Thread(target=self.voice_worker, args=(voice,), name="suni-voice", daemon=True)
                 voice_thread.start()
-            self.status("Đang nghe • WASAPI loopback")
+            self.status("Đang mở nguồn thu tiến trình…" if s.capture_kind == 'process' else "Đang nghe • WASAPI loopback")
             chunks, size, begin, previous_end = [], 0, None, 0
             while not self.stop_event.is_set():
                 try:

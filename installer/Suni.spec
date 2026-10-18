@@ -1,5 +1,6 @@
 from PyInstaller.utils.hooks import collect_all
 datas, binaries, hiddenimports = [], [], []
+datas.append(('../native/windows_audio/SuniProcessLoopback.exe', 'native/windows_audio'))
 for name in ('faster_whisper', 'piper', 'pyaudiowpatch', 'ctranslate2', 'transformers', 'sentencepiece'):
     d, b, h = collect_all(name)
     datas += d
