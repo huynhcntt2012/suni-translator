@@ -10,6 +10,8 @@
 - Đã phát hiện/sửa race native PortAudio init/terminate bằng audio owner dùng chung và khóa vòng đời; test pipeline sau sửa pass.
 - Piper vais1000 tiếng Việt: synthesize WAV thành công. Chưa đánh giá chất lượng nghe, chưa test cùng pipeline trên hai endpoint vì phiên này chỉ có Remote Audio.
 - Ducking thật trên Remote Audio: giảm xuống 95%, phát sinh exception có kiểm soát, khôi phục từ 1,0 về đúng 1,0 và xóa recovery journal. Chưa thử rút thiết bị giữa thao tác hoặc kill process.
+- Bản EXE: self-test thành công với một thiết bị thu/phát, nạp Whisper local, chạy STT trên silence, dịch NLLB sang Việt và dựng/đóng giao diện. Báo cáo tại `%LOCALAPPDATA%/SuniLiveTranslator/self-test.json`; ảnh tại `self-test.png` cùng thư mục.
+- Đã sửa xung đột DLL khi đóng gói: loại ICU của Poppler bị lấy nhầm từ PATH; Qt dùng ICU do Windows cung cấp.
 
 Kết quả thô: `tmp/verification/result.json`, `tmp/verification/pipeline-result.json`, `tmp/verification/voice-vi.wav`. Những file này là artifact cục bộ, không đưa vào Git mặc định. Các test dùng speech thực hoặc synthetic speech qua driver thật, không mock capture/STT/translation.
 
