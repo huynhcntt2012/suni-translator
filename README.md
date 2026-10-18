@@ -1,5 +1,7 @@
 # Suni Live Translator
 
+Repository: [huynhcntt2012/suni-translator](https://github.com/huynhcntt2012/suni-translator).
+
 Ứng dụng desktop Windows theo tài liệu Suni Live Translator Dev Brief 1.0. Đây là bản triển khai MVP 0.1, chưa phải bản nghiệm thu đủ tám phase.
 
 ## Chạy trên máy này

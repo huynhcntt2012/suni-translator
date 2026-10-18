@@ -1,6 +1,6 @@
 # Release 0.1.0 — MVP preview
 
-Bản triển khai gồm source, launcher, bản portable `dist/Suni/Suni.exe`, cấu hình packaging PyInstaller/Inno Setup, test và hướng dẫn. Self-test trên EXE đã kiểm tra nạp model, dịch offline và giao diện. Giữ nguyên thư mục `_internal` cạnh EXE; không chép riêng EXE. Không phải release production đầy đủ tài liệu Dev Brief. Chưa xuất bản repository GitHub vì người dùng chưa chỉ định repository và chưa yêu cầu publish.
+Bản triển khai gồm source, launcher, bản portable `dist/Suni/Suni.exe`, cấu hình packaging PyInstaller/Inno Setup, test và hướng dẫn. Self-test trên EXE đã kiểm tra nạp model, dịch offline và giao diện. Giữ nguyên thư mục `_internal` cạnh EXE; không chép riêng EXE. Không phải release production đầy đủ tài liệu Dev Brief. Repository mã nguồn: https://github.com/huynhcntt2012/suni-translator. Binary và model không đưa vào Git; build theo hướng dẫn DEVELOPMENT.
 
 Model Whisper small (~0.5 GB) và NLLB (~2.5 GB) được lưu riêng. Bộ cài phải giữ nguyên model/data khi nâng cấp; không xóa profile khi uninstall mặc định. NLLB không dành cho phân phối thương mại dưới giấy phép hiện tại.
 
