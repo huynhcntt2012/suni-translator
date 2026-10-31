@@ -22,6 +22,14 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
 $env:DOTNET_CLI_TELEMETRY_OPTOUT = '1'
 
+# Suni đang chạy (kể cả ẩn ở khay) sẽ khoá file trong bin/ và artifacts/ → build hỏng giữa chừng, thư mục đóng gói mất model.
+$running = Get-Process Suni.App, Suni.AsrWorker -ErrorAction SilentlyContinue |
+    Where-Object { $_.Path -and $_.Path.StartsWith($root, [StringComparison]::OrdinalIgnoreCase) }
+if ($running) {
+    $list = ($running | ForEach-Object { "  PID $($_.Id): $($_.Path)" }) -join "`n"
+    throw "Suni đang chạy từ thư mục dự án — hãy thoát trước khi build (chuột phải icon ở khay → Thoát):`n$list"
+}
+
 dotnet build (Join-Path $root 'SuniTranslator.slnx') -c $Configuration
 if ($LASTEXITCODE -ne 0) { throw 'Build thất bại.' }
 if (-not $SkipTests) {

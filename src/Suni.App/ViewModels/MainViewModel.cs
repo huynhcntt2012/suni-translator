@@ -182,6 +182,8 @@ public sealed partial class MainViewModel : ObservableObject
     public async Task InitializeAsync()
     {
         await _settingsService.LoadAsync();
+        if (App.StartupNotice is { } notice)
+            StatusMessage = notice;
         SourceLang = _settings.Asr.SourceLang ?? "auto";
         TargetLang = Languages.Find(_settings.Translation.TargetLang) ?? TargetLang;
         UseGpu = _settings.Asr.Device != "cpu";

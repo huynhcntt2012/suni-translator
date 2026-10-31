@@ -57,10 +57,12 @@ public partial class MainWindow : Window
 
     private void ReportHotkeys(IReadOnlyList<HotkeyRegistration> result)
     {
+        const string prefix = "Phím tắt đang bị ứng dụng khác dùng";
+        // Bỏ dòng cảnh báo phím tắt cũ (nếu có) nhưng giữ các thông báo khác, vd. "đã khôi phục lịch sử".
+        var others = (_vm.StatusMessage ?? "").Split('\n').Where(l => l.Length > 0 && !l.StartsWith(prefix, StringComparison.Ordinal));
         var taken = result.Where(r => r.Status == HotkeyStatus.Taken).Select(r => r.Text).ToList();
-        _vm.StatusMessage = taken.Count > 0
-            ? $"Phím tắt đang bị ứng dụng khác dùng: {string.Join(", ", taken)} — đổi trong Settings."
-            : _vm.StatusMessage?.StartsWith("Phím tắt", StringComparison.Ordinal) == true ? null : _vm.StatusMessage;
+        var lines = taken.Count > 0 ? others.Append($"{prefix}: {string.Join(", ", taken)} — đổi trong Settings.") : others;
+        _vm.StatusMessage = lines.Any() ? string.Join('\n', lines) : null;
     }
 
     /// <summary>Đóng cửa sổ khi đang dịch → xuống khay (SDD 8.3); còn lại → thoát thật.</summary>

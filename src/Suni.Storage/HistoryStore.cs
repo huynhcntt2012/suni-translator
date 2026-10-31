@@ -10,7 +10,7 @@ namespace Suni.Storage;
 /// Lịch sử phiên/câu trong SQLite (SDD 7). Mỗi thao tác mở một kết nối (có pool); WAL cho phép đọc trong lúc
 /// <see cref="HistoryRecorder"/> ghi. Ghi theo lô dùng <see cref="WriteBatchAsync"/> trong một transaction.
 /// </summary>
-public sealed class HistoryStore(SuniDatabase db) : ISessionRepository, ISegmentRepository
+public sealed partial class HistoryStore(SuniDatabase db) : ISessionRepository, ISegmentRepository
 {
     private int _migrated;
 

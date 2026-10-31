@@ -7,14 +7,25 @@ namespace Suni.Storage;
 /// <summary>Mở kết nối SQLite (WAL) và chạy migration nhúng trong assembly (Schema/NNN_*.sql).</summary>
 public sealed class SuniDatabase(string connectionString)
 {
-    public static string DefaultPath =>
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Suni", "data", "suni.db");
+    /// <summary>
+    /// Thư mục dữ liệu của app: %LOCALAPPDATA%\Suni, hoặc biến môi trường SUNI_DATA_DIR nếu có —
+    /// dùng cho test/chạy thử để không bao giờ chạm vào lịch sử và cài đặt thật của người dùng.
+    /// </summary>
+    public static string DataRoot =>
+        Environment.GetEnvironmentVariable("SUNI_DATA_DIR") is { Length: > 0 } custom
+            ? custom
+            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Suni");
+
+    public static string DefaultPath => Path.Combine(DataRoot, "data", "suni.db");
 
     public static SuniDatabase ForFile(string path)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         return new SuniDatabase(new SqliteConnectionStringBuilder { DataSource = path, ForeignKeys = true }.ToString());
     }
+
+    /// <summary>Đường dẫn file DB.</summary>
+    public string FilePath { get; } = new SqliteConnectionStringBuilder(connectionString).DataSource;
 
     public async Task<SqliteConnection> OpenAsync(CancellationToken ct = default)
     {

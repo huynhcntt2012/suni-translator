@@ -20,8 +20,7 @@ public sealed class JsonSettingsStore(string path) : ISettingsStore
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower) },
     };
 
-    public static string DefaultPath =>
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Suni", "settings.json");
+    public static string DefaultPath => Path.Combine(SuniDatabase.DataRoot, "settings.json");
 
     public async Task<AppSettings> LoadAsync(CancellationToken ct = default)
     {
