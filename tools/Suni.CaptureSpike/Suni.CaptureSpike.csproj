@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Suni.Audio\Suni.Audio.csproj" />
+    <ProjectReference Include="..\..\src\Suni.Pipeline\Suni.Pipeline.csproj" />
+    <ProjectReference Include="..\..\src\Suni.Translation\Suni.Translation.csproj" />
+    <ProjectReference Include="..\..\src\Suni.Storage\Suni.Storage.csproj" />
+    <ProjectReference Include="..\..\src\Suni.AsrWorker\Suni.AsrWorker.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+</Project>

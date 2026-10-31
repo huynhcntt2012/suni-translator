@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Suni.Core\Suni.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Silero VAD v5.1.2 (MIT), đi kèm installer. -->
+    <None Include="..\..\models\vad\silero_vad.onnx" Link="models\vad\silero_vad.onnx" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

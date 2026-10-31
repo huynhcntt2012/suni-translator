@@ -1,0 +1,135 @@
+<Window x:Class="Suni.App.HistoryWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:core="clr-namespace:Suni.Core.Abstractions;assembly=Suni.Core"
+        xmlns:conv="clr-namespace:Suni.App.Converters"
+        Title="Lịch sử — Suni AI Live Translator" Height="620" Width="1000" MinWidth="720" MinHeight="420"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource SurfaceBrush}" Foreground="{StaticResource TextBrush}"
+        FontFamily="{StaticResource UiFont}" FontSize="14">
+    <Window.Resources>
+        <conv:NullToCollapsedConverter x:Key="NullToCollapsed" />
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <conv:NotBoolToVisibilityConverter x:Key="NotBoolToVis" />
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="4,0" />
+            <Setter Property="Padding" Value="12,4" />
+        </Style>
+    </Window.Resources>
+
+    <DockPanel Margin="12">
+        <!-- Thanh lệnh -->
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+            <Button DockPanel.Dock="Right" Content="Xoá tất cả" Command="{Binding DeleteAllCommand}" />
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Tìm" VerticalAlignment="Center" Margin="0,0,6,0" />
+                <TextBox Width="280" VerticalContentAlignment="Center"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         ToolTip="Tìm trong câu gốc và bản dịch của mọi phiên (Việt, Anh, Nhật, Hàn, Trung…)" />
+                <Button Content="Làm mới" Command="{Binding RefreshCommand}" Margin="8,0,4,0" />
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Thông báo -->
+        <Border DockPanel.Dock="Bottom" Margin="0,10,0,0" Padding="10,6" CornerRadius="4" Background="{StaticResource PanelBrush}"
+                Visibility="{Binding Message, Converter={StaticResource NullToCollapsed}}">
+            <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
+        </Border>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300" />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <!-- Danh sách phiên -->
+            <ListBox ItemsSource="{Binding Sessions}" SelectedItem="{Binding SelectedSession}"
+                     Background="{StaticResource PanelBrush}" Foreground="{StaticResource TextBrush}" BorderThickness="0">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Margin="4,6">
+                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding Detail}" Foreground="{StaticResource MutedBrush}" FontSize="12" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <!-- Chi tiết phiên / kết quả tìm -->
+            <DockPanel Grid.Column="2">
+                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                        <ComboBox ItemsSource="{Binding ContentOptions}" SelectedItem="{Binding SelectedContent}"
+                                  DisplayMemberPath="Label" MinWidth="120" Margin="0,0,4,0" />
+                        <Button Content="TXT" Command="{Binding ExportCommand}" CommandParameter="{x:Static core:ExportFormat.Txt}" />
+                        <Button Content="SRT" Command="{Binding ExportCommand}" CommandParameter="{x:Static core:ExportFormat.Srt}" />
+                        <Button Content="JSON" Command="{Binding ExportCommand}" CommandParameter="{x:Static core:ExportFormat.Json}" />
+                        <Button Content="Copy" Command="{Binding CopyCommand}" />
+                        <Button Content="Xoá phiên" Command="{Binding DeleteSessionCommand}" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding DetailTitle}" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                </DockPanel>
+
+                <ListBox ItemsSource="{Binding Lines}" Background="{StaticResource PanelBrush}" Foreground="{StaticResource TextBrush}"
+                         BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80" />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{Binding Time}" Foreground="{StaticResource MutedBrush}" VerticalAlignment="Top" />
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="{Binding SessionTitle}" Foreground="{StaticResource MutedBrush}" FontSize="11"
+                                               Visibility="{Binding SessionTitle, Converter={StaticResource NullToCollapsed}}" />
+                                    <TextBlock Text="{Binding Original}" TextWrapping="Wrap" />
+
+                                    <!-- Xem: nháy đúp hoặc ✎ để sửa -->
+                                    <DockPanel Visibility="{Binding IsEditing, Converter={StaticResource NotBoolToVis}}">
+                                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
+                                            <TextBlock Text="đã sửa" FontSize="11" Foreground="#FFFFB547" Margin="8,2,4,0"
+                                                       ToolTip="{Binding MachineTooltip}"
+                                                       Visibility="{Binding IsEdited, Converter={StaticResource BoolToVis}}" />
+                                            <Button Content="✎" ToolTip="Sửa bản dịch (hoặc nháy đúp vào bản dịch)" Padding="6,0" Margin="2,0"
+                                                    AutomationProperties.Name="Sửa bản dịch"
+                                                    Command="{Binding DataContext.BeginEditCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}" />
+                                            <Button Content="↺" ToolTip="Hoàn tác về bản máy dịch" Padding="6,0" Margin="2,0"
+                                                    AutomationProperties.Name="Hoàn tác bản sửa"
+                                                    Visibility="{Binding IsEdited, Converter={StaticResource BoolToVis}}"
+                                                    Command="{Binding DataContext.RevertEditCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}" />
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding Translation}" TextWrapping="Wrap" FontWeight="SemiBold"
+                                                   Foreground="{StaticResource AccentBrush}" ToolTip="{Binding MachineTooltip}"
+                                                   MouseLeftButtonDown="OnTranslationMouseDown" />
+                                    </DockPanel>
+
+                                    <!-- Sửa: Enter lưu, Shift+Enter xuống dòng, Esc huỷ -->
+                                    <StackPanel Visibility="{Binding IsEditing, Converter={StaticResource BoolToVis}}" Margin="0,4,0,0">
+                                        <TextBox Text="{Binding EditText, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" AcceptsReturn="False"
+                                                 MinHeight="28" Padding="4,3" FontWeight="SemiBold" AutomationProperties.Name="Bản dịch đang sửa"
+                                                 PreviewKeyDown="OnEditKeyDown" IsVisibleChanged="OnEditBoxVisible" />
+                                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                            <Button Content="Lưu" Padding="12,2" Margin="0,0,6,0"
+                                                    Command="{Binding DataContext.SaveEditCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}" />
+                                            <Button Content="Huỷ" Padding="12,2" Margin="0"
+                                                    Command="{Binding DataContext.CancelEditCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}" />
+                                            <TextBlock Text="Enter lưu · Shift+Enter xuống dòng · Esc huỷ" Foreground="{StaticResource MutedBrush}"
+                                                       FontSize="11" Margin="10,0,0,0" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+        </Grid>
+    </DockPanel>
+</Window>

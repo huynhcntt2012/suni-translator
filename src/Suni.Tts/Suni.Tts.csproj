@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Windows.Media.SpeechSynthesis / Windows.Media.Playback (WinRT): giọng đọc offline có sẵn trong Windows -->
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Suni.Core\Suni.Core.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <!-- Chỉ dùng NotifyIcon (khay hệ thống); bỏ global using của WinForms để không trùng tên với WPF -->
+    <UseWindowsForms>true</UseWindowsForms>
+    <!-- WFO0003 gợi ý bỏ DPI khỏi manifest cho WinForms; app là WPF và cần PerMonitorV2 trong manifest -->
+    <NoWarn>$(NoWarn);WFO0003</NoWarn>
+    <PlatformTarget>x64</PlatformTarget>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks> <!-- LibraryImport cho Win32 của overlay -->  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Suni.Core\Suni.Core.csproj" />
+    <ProjectReference Include="..\Suni.Audio\Suni.Audio.csproj" />
+    <ProjectReference Include="..\Suni.Asr\Suni.Asr.csproj" />
+    <ProjectReference Include="..\Suni.Translation\Suni.Translation.csproj" />
+    <ProjectReference Include="..\Suni.Storage\Suni.Storage.csproj" />
+    <ProjectReference Include="..\Suni.Pipeline\Suni.Pipeline.csproj" />
+    <ProjectReference Include="..\Suni.Tts\Suni.Tts.csproj" />
+    <!-- Chỉ để build worker cùng app; worker chạy process riêng (AppPaths.AsrWorkerPath). -->
+    <ProjectReference Include="..\Suni.AsrWorker\Suni.AsrWorker.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+  </ItemGroup>
+
+</Project>

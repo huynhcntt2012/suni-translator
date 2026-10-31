@@ -1,0 +1,90 @@
+<Window x:Class="Suni.App.Overlay.OverlayWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:Suni.App.Controls"
+        Title="Suni Overlay"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        Topmost="True" ShowInTaskbar="False" ShowActivated="False" ResizeMode="NoResize"
+        SizeToContent="Height" MinHeight="40" Width="900" MinWidth="300">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <Style x:Key="ToolButton" TargetType="Button">
+            <Setter Property="Width" Value="30" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="Margin" Value="2,0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Background" Value="#CC2B2D33" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Focusable" Value="False" />
+        </Style>
+    </Window.Resources>
+
+    <Grid x:Name="Root">
+        <!-- Nền + chữ -->
+        <Border x:Name="Panel" CornerRadius="8" Padding="18,8,18,10" Background="{Binding PanelBrush}"
+                MouseLeftButtonDown="OnPanelMouseDown">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="BorderThickness" Value="0" />
+                    <Style.Triggers>
+                        <!-- Chưa khoá: viền nét đứt để biết vùng kéo được -->
+                        <DataTrigger Binding="{Binding Locked}" Value="False">
+                            <Setter Property="BorderThickness" Value="1" />
+                            <Setter Property="BorderBrush" Value="#88FFFFFF" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <StackPanel>
+                <TextBlock Text="Phụ đề sẽ hiện ở đây — kéo để di chuyển, kéo mép phải để đổi bề rộng, 🔒 để khoá (Ctrl+Alt+L)"
+                           Foreground="#CCFFFFFF" FontSize="14" TextAlignment="Center" TextWrapping="Wrap" Margin="0,6"
+                           Visibility="{Binding ShowPlaceholder, Converter={StaticResource BoolToVis}}" />
+                <ItemsControl ItemsSource="{Binding Lines}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="0,2">
+                                <controls:OutlinedText Text="{Binding Original}" Fill="#FFE0E0E0" FontWeight="Normal"
+                                                       FontSize="{Binding DataContext.OriginalFontSize, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                       StrokeThickness="2.5"
+                                                       Visibility="{Binding DataContext.ShowOriginal, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVis}}" />
+                                <controls:OutlinedText Fill="#FFFFF4A8" StrokeThickness="3"
+                                                       FontSize="{Binding DataContext.FontSize, RelativeSource={RelativeSource AncestorType=Window}}">
+                                    <controls:OutlinedText.Style>
+                                        <Style TargetType="controls:OutlinedText">
+                                            <!-- Không song ngữ / phiên không dịch: bản dịch nếu có, không thì câu gốc -->
+                                            <Setter Property="Text" Value="{Binding PrimaryText}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding DataContext.ShowOriginal, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
+                                                    <Setter Property="Text" Value="{Binding Translation, TargetNullValue='…'}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </controls:OutlinedText.Style>
+                                </controls:OutlinedText>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+
+        <!-- Thanh công cụ: chỉ hiện khi rê chuột và chưa khoá; nằm trong góc khung để không có khe trong suốt làm mất hover -->
+        <StackPanel x:Name="Toolbar" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top"
+                    Margin="0,4,14,0" Visibility="Collapsed">
+            <Button Style="{StaticResource ToolButton}" Content="A−" ToolTip="Chữ nhỏ hơn" Command="{Binding SmallerCommand}" />
+            <Button Style="{StaticResource ToolButton}" Content="A+" ToolTip="Chữ to hơn" Command="{Binding BiggerCommand}" />
+            <Button Style="{StaticResource ToolButton}" Content="◐−" ToolTip="Nền trong hơn" Command="{Binding LessOpaqueCommand}" />
+            <Button Style="{StaticResource ToolButton}" Content="◐+" ToolTip="Nền đậm hơn" Command="{Binding MoreOpaqueCommand}" />
+            <Button Style="{StaticResource ToolButton}" Content="⇅" ToolTip="Số câu hiện (1–3)" Command="{Binding CycleLinesCommand}" />
+            <Button Style="{StaticResource ToolButton}" Content="2L" ToolTip="Song ngữ / chỉ bản dịch" Command="{Binding ToggleBilingualCommand}" />
+            <Button Style="{StaticResource ToolButton}" Content="🔒" ToolTip="Khoá: chuột xuyên qua overlay (mở lại: Ctrl+Alt+L)" Command="{Binding ToggleLockCommand}" />
+            <Button Style="{StaticResource ToolButton}" Content="✕" ToolTip="Ẩn overlay (Ctrl+Alt+O)" Command="{Binding CloseCommand}" />
+        </StackPanel>
+
+        <!-- Kéo mép phải để đổi bề rộng -->
+        <Thumb x:Name="WidthGrip" HorizontalAlignment="Right" Width="10" Cursor="SizeWE" Opacity="0.01"
+               DragDelta="OnWidthDrag" DragCompleted="OnWidthDragCompleted" />
+    </Grid>
+</Window>

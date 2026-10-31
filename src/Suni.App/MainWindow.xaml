@@ -1,0 +1,174 @@
+﻿<Window x:Class="Suni.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:Suni.App.ViewModels"
+        xmlns:conv="clr-namespace:Suni.App.Converters"
+        xmlns:core="clr-namespace:Suni.Core.Abstractions;assembly=Suni.Core"
+        Title="Suni AI Live Translator" Height="640" Width="980" MinWidth="720" MinHeight="480"
+        Background="{StaticResource SurfaceBrush}" Foreground="{StaticResource TextBrush}"
+        FontFamily="{StaticResource UiFont}" FontSize="14">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <conv:NotConverter x:Key="Not" />
+        <conv:NullToCollapsedConverter x:Key="NullToCollapsed" />
+        <Style TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Margin" Value="6,0,16,0" />
+            <Setter Property="MinWidth" Value="110" />
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="4,0" />
+            <Setter Property="Padding" Value="14,4" />
+        </Style>
+    </Window.Resources>
+
+    <DockPanel d:DataContext="{d:DesignInstance vm:MainViewModel}"
+               xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+               xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d">
+
+        <!-- Header -->
+        <Border DockPanel.Dock="Top" Background="{StaticResource PanelBrush}" Padding="16,10">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Content="Settings" Command="{Binding OpenSettingsCommand}" />
+                <TextBlock Text="SUNI AI LIVE TRANSLATOR" FontWeight="SemiBold" FontSize="16" />
+            </DockPanel>
+        </Border>
+
+        <!-- Nguồn & ngôn ngữ -->
+        <StackPanel DockPanel.Dock="Top" Margin="16,12,16,0">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Audio Source" />
+                <ComboBox MinWidth="280" ItemsSource="{Binding AudioSources}" SelectedItem="{Binding SelectedSource}"
+                          IsEnabled="{Binding IsRunning, Converter={StaticResource Not}}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="●" Margin="0,0,6,0" Foreground="{StaticResource AccentBrush}"
+                                           Visibility="{Binding IsActive, Converter={StaticResource BoolToVis}}" />
+                                <TextBlock Text="{Binding DisplayName}" />
+                                <TextBlock Margin="6,0,0,0" Foreground="Gray">
+                                    <Run Text="{Binding ExeName, Mode=OneWay}" /> <Run Text="{Binding RootPid, Mode=OneWay}" />
+                                </TextBlock>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <Button Content="Refresh" Command="{Binding RefreshSourcesCommand}" />
+                <TextBlock Text="Input" Margin="16,0,6,0" />
+                <ProgressBar Width="140" Height="10" Maximum="1" Value="{Binding InputLevel, Mode=OneWay}" />
+                <Ellipse Width="10" Height="10" Margin="8,0,0,0" ToolTip="Đang có lời nói">
+                    <Ellipse.Style>
+                        <Style TargetType="Ellipse">
+                            <Setter Property="Fill" Value="#FF44474F" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsSpeaking}" Value="True">
+                                    <Setter Property="Fill" Value="#FF3DDC84" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Ellipse.Style>
+                </Ellipse>
+                <Button Content="Start" Margin="16,0,4,0" Command="{Binding StartCommand}" />
+                <Button Content="Stop" Command="{Binding StopCommand}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                <TextBlock Text="Source" />
+                <ComboBox ItemsSource="{Binding SourceLanguages}" SelectedItem="{Binding SourceLang}" />
+                <TextBlock Text="Target" />
+                <ComboBox ItemsSource="{Binding TargetLanguages}" SelectedItem="{Binding TargetLang}" DisplayMemberPath="NativeName" />
+                <TextBlock Text="ASR" />
+                <ComboBox MinWidth="160" ItemsSource="{Binding AsrModels}" SelectedItem="{Binding AsrModel}"
+                          IsEnabled="{Binding IsRunning, Converter={StaticResource Not}}" />
+                <CheckBox Content="GPU" IsChecked="{Binding UseGpu}" Foreground="{StaticResource TextBrush}"
+                          VerticalAlignment="Center" Margin="0,0,16,0"
+                          IsEnabled="{Binding IsRunning, Converter={StaticResource Not}}" />
+            </StackPanel>
+            <!-- Ollama (FR-14, FR-15): URL do người dùng nhập, Kết nối = GET /api/tags -->
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                <TextBlock Text="Ollama" />
+                <TextBox Width="220" Margin="6,0,6,0" VerticalContentAlignment="Center" Text="{Binding OllamaUrl, UpdateSourceTrigger=PropertyChanged}"
+                         IsEnabled="{Binding IsRunning, Converter={StaticResource Not}}" ToolTip="Ví dụ http://127.0.0.1:11434 hoặc http://192.168.1.96:12121" />
+                <Button Content="Kết nối" Command="{Binding ConnectOllamaCommand}"
+                        IsEnabled="{Binding IsRunning, Converter={StaticResource Not}}" />
+                <TextBlock Text="LLM" Margin="12,0,0,0" />
+                <ComboBox MinWidth="180" ItemsSource="{Binding OllamaModels}" SelectedItem="{Binding OllamaModel}"
+                          IsEnabled="{Binding IsRunning, Converter={StaticResource Not}}" />
+                <TextBlock Text="{Binding OllamaStatus}" Foreground="{StaticResource MutedBrush}" />
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Thanh dưới -->
+        <Border DockPanel.Dock="Bottom" Background="{StaticResource PanelBrush}" Padding="16,8">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Right" Foreground="{StaticResource MutedBrush}">
+                    <Run Text="{Binding PipelineStatus, Mode=OneWay}" /> <Run Text="| Queue:" /> <Run Text="{Binding QueueLength, Mode=OneWay}" />
+                    <Run Text="| Trễ ASR:" /> <Run Text="{Binding LatencyText, Mode=OneWay}" />
+                    <Run Text="|" /> <Run Text="{Binding AsrRuntime, Mode=OneWay}" />
+                    <Run Text="{Binding TtsStatus, Mode=OneWay}" />
+                </TextBlock>
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="Copy" Command="{Binding CopyCommand}" />
+                    <Button Content="Export TXT" Command="{Binding ExportCommand}" CommandParameter="{x:Static core:ExportFormat.Txt}" />
+                    <Button Content="Export SRT" Command="{Binding ExportCommand}" CommandParameter="{x:Static core:ExportFormat.Srt}" />
+                    <Button Content="History" Command="{Binding OpenHistoryCommand}" />
+                    <!-- Button thường (không phải ToggleButton) để cả chuột lẫn UI Automation/công cụ hỗ trợ đều chạy Command -->
+                    <Button Content="Overlay" Command="{Binding ToggleOverlayCommand}" ToolTip="Phụ đề nổi trên ứng dụng khác (Ctrl+Alt+O)">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsOverlayVisible}" Value="True">
+                                        <Setter Property="FontWeight" Value="Bold" />
+                                        <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <CheckBox Content="Khoá overlay" IsChecked="{Binding OverlayLocked}" VerticalAlignment="Center" Margin="6,0,0,0"
+                              Foreground="{StaticResource TextBrush}" ToolTip="Khoá: chuột xuyên qua overlay (Ctrl+Alt+L)" />
+                    <CheckBox Content="Đọc bản dịch" IsChecked="{Binding TtsEnabled}" VerticalAlignment="Center" Margin="12,0,0,0"
+                              Foreground="{StaticResource TextBrush}"
+                              ToolTip="Đọc to bản dịch bằng giọng offline của Windows (chọn giọng, thiết bị, tốc độ trong Settings)" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Thông báo lỗi/cảnh báo: banner trong cửa sổ, không dùng pop-up (SRS 3.1) -->
+        <Border DockPanel.Dock="Top" Margin="16,10,16,0" Padding="10,6" CornerRadius="4" Background="#FF5A3A1E"
+                Visibility="{Binding StatusMessage, Converter={StaticResource NullToCollapsed}}">
+            <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" />
+        </Border>
+
+        <!-- Phụ đề trực tiếp -->
+        <Border Margin="16,12" Background="{StaticResource PanelBrush}" CornerRadius="6" Padding="12">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top" Text="PHỤ ĐỀ TRỰC TIẾP" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,8" />
+                <ListBox x:Name="LinesList" ItemsSource="{Binding Lines}" Background="Transparent" BorderThickness="0"
+                         Foreground="{StaticResource TextBrush}"
+                         VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80" />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Top">
+                                    <TextBlock Text="{Binding Time}" Foreground="{StaticResource MutedBrush}" />
+                                    <TextBlock Text="{Binding Language}" Foreground="{StaticResource MutedBrush}" FontSize="11" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="{Binding Original}" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding Translation}" TextWrapping="Wrap" FontWeight="SemiBold"
+                                               Foreground="{StaticResource AccentBrush}" />
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+        </Border>
+    </DockPanel>
+</Window>

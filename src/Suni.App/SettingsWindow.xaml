@@ -1,0 +1,108 @@
+<Window x:Class="Suni.App.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:conv="clr-namespace:Suni.App.Converters"
+        Title="Cài đặt — Suni AI Live Translator" Width="640" SizeToContent="Height" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource SurfaceBrush}" Foreground="{StaticResource TextBrush}"
+        FontFamily="{StaticResource UiFont}" FontSize="14">
+    <Window.Resources>
+        <conv:NullToCollapsedConverter x:Key="NullToCollapsed" />
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="6,0,0,0" />
+            <Setter Property="Padding" Value="16,5" />
+        </Style>
+    </Window.Resources>
+
+    <StackPanel Margin="20">
+        <TextBlock Text="Phím tắt toàn cục" FontWeight="SemiBold" FontSize="16" />
+        <TextBlock Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" Margin="0,4,0,12"
+                   Text="Bấm vào ô rồi nhấn tổ hợp phím mới (cần Ctrl, Alt hoặc Win). Backspace/Delete = tắt phím đó, Esc = giữ nguyên. Phím tắt hoạt động cả khi đang ở ứng dụng khác." />
+
+        <ItemsControl ItemsSource="{Binding Rows}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="260" />
+                            <ColumnDefinition Width="170" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{Binding Label}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                        <TextBox Grid.Column="1" Text="{Binding Text, Mode=OneWay}" IsReadOnly="True" IsReadOnlyCaretVisible="False"
+                                 Padding="6,4" FontWeight="SemiBold" HorizontalContentAlignment="Center"
+                                 PreviewKeyDown="OnHotkeyKeyDown" AutomationProperties.Name="{Binding Label}" />
+                        <TextBlock Grid.Column="2" Text="{Binding StatusText}" Margin="10,0,0,0" VerticalAlignment="Center" TextWrapping="Wrap" FontSize="12">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Status}" Value="Ok">
+                                            <Setter Property="Foreground" Value="#FF3DDC84" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Status}" Value="Invalid">
+                                            <Setter Property="Foreground" Value="#FFFF6B6B" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Status}" Value="Taken">
+                                            <Setter Property="Foreground" Value="#FFFFB547" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <TextBlock Text="Khay hệ thống" FontWeight="SemiBold" FontSize="16" Margin="0,10,0,8" />
+        <CheckBox IsChecked="{Binding CloseToTray}" Foreground="{StaticResource TextBrush}" Margin="0,0,0,6"
+                  Content="Đóng cửa sổ khi đang dịch thì thu nhỏ xuống khay (tiếp tục dịch nền)" />
+        <CheckBox IsChecked="{Binding TrayNotifications}" Foreground="{StaticResource TextBrush}"
+                  Content="Thông báo khi mất nguồn / mất kết nối Ollama / lỗi lúc cửa sổ đang ẩn" />
+
+        <TextBlock Text="Đọc bản dịch (giọng offline của Windows)" FontWeight="SemiBold" FontSize="16" Margin="0,16,0,8" />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="140" />
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+            </Grid.RowDefinitions>
+            <TextBlock Text="Giọng đọc" VerticalAlignment="Center" />
+            <ComboBox Grid.Column="1" Grid.ColumnSpan="2" Margin="0,3" ItemsSource="{Binding Voices}" SelectedItem="{Binding SelectedVoice}"
+                      DisplayMemberPath="Label" AutomationProperties.Name="Giọng đọc" />
+            <TextBlock Grid.Row="1" Text="Phát ra" VerticalAlignment="Center" />
+            <ComboBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,3" ItemsSource="{Binding OutputDevices}"
+                      SelectedItem="{Binding SelectedOutputDevice}" DisplayMemberPath="Label" AutomationProperties.Name="Thiết bị phát giọng đọc"
+                      ToolTip="Vd. chọn tai nghe cho giọng đọc trong khi âm thanh gốc vẫn ra loa" />
+            <TextBlock Grid.Row="2" Text="Tốc độ" VerticalAlignment="Center" />
+            <Slider Grid.Row="2" Grid.Column="1" Margin="0,6" Minimum="0.5" Maximum="2" TickFrequency="0.1" IsSnapToTickEnabled="True"
+                    Value="{Binding TtsRate}" AutomationProperties.Name="Tốc độ đọc" />
+            <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding TtsRate, StringFormat={}{0:0.0}×}" Width="44" TextAlignment="Right" VerticalAlignment="Center" />
+            <TextBlock Grid.Row="3" Text="Âm lượng" VerticalAlignment="Center" />
+            <Slider Grid.Row="3" Grid.Column="1" Margin="0,6" Minimum="0" Maximum="1" TickFrequency="0.05" IsSnapToTickEnabled="True"
+                    Value="{Binding TtsVolume}" AutomationProperties.Name="Âm lượng đọc" />
+            <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding TtsVolume, StringFormat={}{0:P0}}" Width="44" TextAlignment="Right" VerticalAlignment="Center" />
+        </Grid>
+        <DockPanel Margin="0,6,0,0">
+            <Button DockPanel.Dock="Right" Content="Nghe thử" Command="{Binding PreviewTtsCommand}" VerticalAlignment="Top" />
+            <TextBlock Text="{Binding VoiceHint}" Foreground="{StaticResource MutedBrush}" FontSize="12" TextWrapping="Wrap" />
+        </DockPanel>
+
+        <Border Margin="0,14,0,0" Padding="10,6" CornerRadius="4" Background="#FF5A3A1E"
+                Visibility="{Binding Message, Converter={StaticResource NullToCollapsed}}">
+            <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
+        </Border>
+
+        <DockPanel Margin="0,18,0,0">
+            <Button DockPanel.Dock="Left" Content="Mặc định" Margin="0" Command="{Binding DefaultsCommand}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Lưu" IsDefault="False" Command="{Binding SaveCommand}" />
+                <Button Content="Huỷ" Command="{Binding CancelCommand}" />
+            </StackPanel>
+        </DockPanel>
+    </StackPanel>
+</Window>

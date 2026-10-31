@@ -1,0 +1,27 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Suni.App/Suni.App.csproj" />
+    <Project Path="src/Suni.Asr/Suni.Asr.csproj" />
+    <Project Path="src/Suni.AsrWorker/Suni.AsrWorker.csproj" />
+    <Project Path="src/Suni.Audio/Suni.Audio.csproj" />
+    <Project Path="src/Suni.Core/Suni.Core.csproj" />
+    <Project Path="src/Suni.Pipeline/Suni.Pipeline.csproj" />
+    <Project Path="src/Suni.Storage/Suni.Storage.csproj" />
+    <Project Path="src/Suni.Translation/Suni.Translation.csproj" />
+    <Project Path="src/Suni.Tts/Suni.Tts.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Suni.App.Tests/Suni.App.Tests.csproj" />
+    <Project Path="tests/Suni.Asr.Tests/Suni.Asr.Tests.csproj" />
+    <Project Path="tests/Suni.Audio.Tests/Suni.Audio.Tests.csproj" />
+    <Project Path="tests/Suni.Core.Tests/Suni.Core.Tests.csproj" />
+    <Project Path="tests/Suni.Pipeline.Tests/Suni.Pipeline.Tests.csproj" />
+    <Project Path="tests/Suni.Storage.Tests/Suni.Storage.Tests.csproj" />
+    <Project Path="tests/Suni.Translation.Tests/Suni.Translation.Tests.csproj" />
+    <Project Path="tests/Suni.Tts.Tests/Suni.Tts.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/Suni.AsrBench/Suni.AsrBench.csproj" />
+    <Project Path="tools/Suni.CaptureSpike/Suni.CaptureSpike.csproj" />
+  </Folder>
+</Solution>
